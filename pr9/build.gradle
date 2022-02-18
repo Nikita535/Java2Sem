@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+}
+
+group 'ru.mirea'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class' : 'ru.mirea.Main'
+        )
+    }
+}
+
+javadoc {
+    options.encoding = 'UTF-8'
+}
+
+task copyJar(type: Copy) {
+    dependsOn 'jar'
+    from file("$buildDir/libs/task09-1.0-SNAPSHOT.jar")
+    into file("$rootDir/src/main/resources/")
+}
+
+task removeJar(type: Delete) {
+    dependsOn 'copyJar'
+    delete file("$buildDir/libs/task09-1.0-SNAPSHOT.jar")
+}
+
+task buildImage(type: Exec) {
+    dependsOn 'removeJar'
+    commandLine 'docker', 'build', '-t', 'task09-1.0', './src/main/resources/'
+}
+
+task dockerRun(type:Exec){
+    dependsOn 'buildImage'
+    commandLine 'docker','run','task09-1.0'
+}
+
